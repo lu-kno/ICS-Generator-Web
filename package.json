@@ -1,0 +1,9 @@
+{
+  "name": "ics-generator-web",
+  "version": "2.14.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

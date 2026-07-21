@@ -332,6 +332,33 @@ async function handleValidationAndAction(events, actionCallback) {
     }
 }
 
+async function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    textarea.remove();
+}
+
+function openEmailDraft() {
+    const subject = encodeURIComponent('Kalenderdatei (.ics)');
+    const body = encodeURIComponent(
+        'Hallo,\n\nanbei finden Sie die Kalenderdatei (.ics) zum Import in Ihren Kalender.\n\n' +
+        'Falls die Datei nicht automatisch angehängt wurde, hängen Sie bitte die heruntergeladene Datei "termine.ics" manuell an.\n'
+    );
+
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
 // Event Handler Initialisierung
 export function initializeEventHandlers() {
     try {
@@ -347,8 +374,45 @@ export function initializeEventHandlers() {
             downloadICSBtn.addEventListener('click', async () => {
                 const events = document.querySelectorAll('.eventForm');
                 if (await handleValidationAndAction(events, async (icsContent) => {
-                    await exportICSFile(icsContent, { filename: 'termine.ics', preferShare: true });
+                    await exportICSFile(icsContent, { filename: 'termine.ics', forceDownload: true });
                 })) return;
+            });
+        }
+
+        const shareICSBtn = document.getElementById('shareICS');
+        if (shareICSBtn) {
+            shareICSBtn.addEventListener('click', async () => {
+                const events = document.querySelectorAll('.eventForm');
+                await handleValidationAndAction(events, async (icsContent) => {
+                    await exportICSFile(icsContent, { filename: 'termine.ics', preferShare: true });
+                });
+            });
+        }
+
+        const emailICSBtn = document.getElementById('emailICS');
+        if (emailICSBtn) {
+            emailICSBtn.addEventListener('click', async () => {
+                const events = document.querySelectorAll('.eventForm');
+                await handleValidationAndAction(events, async (icsContent) => {
+                    await exportICSFile(icsContent, { filename: 'termine.ics', forceDownload: true });
+                    openEmailDraft();
+                });
+            });
+        }
+
+        const copyICSContentBtn = document.getElementById('copyICSContent');
+        if (copyICSContentBtn) {
+            copyICSContentBtn.addEventListener('click', async () => {
+                const events = document.querySelectorAll('.eventForm');
+                await handleValidationAndAction(events, async (icsContent) => {
+                    try {
+                        await copyTextToClipboard(icsContent);
+                        showSuccessMessage('ICS-Inhalt wurde in die Zwischenablage kopiert.');
+                    } catch (error) {
+                        console.error(error);
+                        showErrorMessage('ICS-Inhalt konnte nicht kopiert werden.');
+                    }
+                });
             });
         }
 
@@ -534,4 +598,3 @@ export function initializeEventHandlers() {
         showErrorMessage('Fehler beim Initialisieren der Event-Handler.');
     }
 }
-

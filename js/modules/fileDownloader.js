@@ -9,16 +9,17 @@
  * @param {object} [options]
  * @param {string} [options.filename] - Dateiname
  * @param {boolean} [options.preferShare] - "Teilen" bevorzugen, wenn verfügbar
+ * @param {boolean} [options.forceDownload] - Immer klassischen Download verwenden
  */
 export const exportICSFile = async (content, options = {}) => {
-    const { filename = 'termine.ics', preferShare = true } = options;
+    const { filename = 'termine.ics', preferShare = true, forceDownload = false } = options;
 
     try {
         const mimeType = 'text/calendar;charset=utf-8';
         const blob = new Blob([content], { type: mimeType });
 
         // 1) Mobile-friendly Share (wenn verfügbar)
-        if (preferShare && typeof navigator !== 'undefined' && navigator.share && navigator.canShare) {
+        if (!forceDownload && preferShare && typeof navigator !== 'undefined' && navigator.share && navigator.canShare) {
             try {
                 const file = new File([blob], filename, { type: mimeType });
                 const shareData = {
