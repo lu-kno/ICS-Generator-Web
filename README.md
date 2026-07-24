@@ -2,6 +2,8 @@
 
 Ein webbasiertes Tool zur Erstellung und Validierung von iCalendar-Dateien.
 
+Live-Version: https://ics-generator.de
+
 ## Features
 
 ### ICS Generator
