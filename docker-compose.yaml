@@ -1,0 +1,8 @@
+services:
+  ics-generator:
+    image: ics_generator
+    build:
+      context: ./
+      dockerfile: dockerfile
+    ports:
+      - 8000:8000
